@@ -84,13 +84,13 @@ git clone https://github.com/paradox-blaze/neovim-config.git "${XDG_CONFIG_HOME:
 If you're using `cmd.exe`:
 
 ```
-git clone https://github.com/nvim-lua/kickstart.nvim.git "%localappdata%\nvim"
+git clone https://github.com/paradox-blaze/neovim-config.git "%localappdata%\nvim"
 ```
 
 If you're using `powershell.exe`
 
 ```
-git clone https://github.com/nvim-lua/kickstart.nvim.git "${env:LOCALAPPDATA}\nvim"
+git clone https://github.com/paradox-blaze/neovim-config.git  "${env:LOCALAPPDATA}\nvim"
 ```
 
 </details>
