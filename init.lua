@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.relativenumber = true
 vim.opt.number = true
 vim.o.number = true
-
+vim.opt.wrap = false
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
 -- vim.o.relativenumber = true
@@ -176,8 +176,18 @@ vim.o.confirm = true
 --  See `:help hlsearch`
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
+vim.keymap.set('n', '<C-a>', 'ggVG', { noremap = true, silent = true })
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- NORMAL mode: Alt+j/k to move line down/up
+-- Normal mode: Move current line up/down
+vim.keymap.set('n', '<D-Down>', ':m .+1<CR>==', { silent = true, desc = 'Move line down' })
+vim.keymap.set('n', '<D-Up>', ':m .-2<CR>==', { silent = true, desc = 'Move line up' })
+
+-- Move selected block up/down in visual mode
+vim.keymap.set('v', '<D-Down>', ":m '>+1<CR>gv=gv", { silent = true, desc = 'Move block down' })
+vim.keymap.set('v', '<D-Up>', ":m '<-2<CR>gv=gv", { silent = true, desc = 'Move block up' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -196,12 +206,41 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
+-- Save destructive changes to "z" register
+vim.keymap.set('n', 'd', '"zd', { noremap = true })
+vim.keymap.set('v', 'd', '"zd', { noremap = true })
+
+vim.keymap.set('n', 'c', '"zc', { noremap = true })
+vim.keymap.set('v', 'c', '"zc', { noremap = true })
+
+vim.keymap.set('n', 'x', '"zx', { noremap = true })
+vim.keymap.set('v', 'x', '"zx', { noremap = true })
+
+-- Paste from the edit register with <leader>p
+vim.keymap.set('n', '<leader>p', '"zp', { noremap = true })
+vim.keymap.set('v', '<leader>p', '"zp', { noremap = true })
+
+-- Optional: if you want <leader>P (paste before) too
+vim.keymap.set('n', '<leader>P', '"zP', { noremap = true })
+vim.keymap.set('v', '<leader>P', '"zP', { noremap = true })
+
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
+vim.keymap.set('n', '<leader>cd', function()
+  local diagnostics = vim.diagnostic.get(0, { lnum = vim.fn.line '.' - 1 })
+  if #diagnostics == 0 then
+    print 'No diagnostics on this line.'
+    return
+  end
+  local lines = {}
+  for _, d in ipairs(diagnostics) do
+    table.insert(lines, d.message)
+  end
+  vim.fn.setreg('+', table.concat(lines, '\n')) -- Copy to system clipboard
+  print 'Copied diagnostic(s) to clipboard!'
+end, { desc = 'Copy diagnostics under cursor to clipboard' })
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
@@ -219,6 +258,35 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.hl.on_yank()
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'html',
+  callback = function()
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+    vim.opt_local.expandtab = true
+  end,
+})
+
+vim.diagnostic.config {
+  virtual_text = false, -- hide inline diagnostics
+  signs = true, -- keep gutter signs
+  underline = true, -- underline issues
+  float = {
+    border = 'rounded', -- nicer look
+    source = 'always', -- show source of diagnostics
+    header = '',
+    prefix = '',
+  },
+}
+
+-- Automatically show diagnostics in floating window on cursor hover
+vim.api.nvim_create_autocmd('CursorHold', {
+  callback = function()
+    vim.diagnostic.open_float(nil, { focusable = false })
   end,
 })
 
