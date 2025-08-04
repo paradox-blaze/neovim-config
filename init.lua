@@ -545,7 +545,6 @@ require('lazy').setup({
     end,
   },
 
-  { 'kylechui/nvim-surround', version = '*', event = 'VeryLazy', config = true }, -- LSP Plugins
   {
     -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
     -- used for completion, annotations and signatures of Neovim apis
@@ -567,27 +566,19 @@ require('lazy').setup({
 
   {
     'folke/flash.nvim',
-    event = 'VeryLazy',
+    event = 'verylazy',
+    ---@type flash.config
     opts = {},
-    keys = {
-      {
-        'f',
-        mode = { 'n', 'x', 'o' },
-        function()
-          require('flash').jump()
-        end,
-        desc = 'Flash',
-      },
-      {
-        'F',
-        mode = { 'n', 'x', 'o' },
-        function()
-          require('flash').jump { search = { forward = false } }
-        end,
-        desc = 'Flash Backward',
-      },
-    },
+  -- stylua: ignore
+  keys = {
+    { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "flash" },
+    { "S", mode = { "n", "o" }, function() require("flash").treesitter() end, desc = "treesitter flash" },
+    { "r", mode = "o", function() require("flash").remote() end, desc = "remote flash" },
+    { "r", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "treesitter search" },
+    { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "toggle flash search" },
   },
+  },
+  { 'kylechui/nvim-surround', version = '*', event = 'verylazy', config = true }, -- lsp plugins
   {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
@@ -1034,7 +1025,6 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
